@@ -32,6 +32,8 @@ public:
 	int farThreshold;
 	
 	int angle;
+    
+    bool bSoundOn = false;
 	
 	
 };

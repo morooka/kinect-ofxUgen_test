@@ -131,31 +131,36 @@ void ofApp::update() {
 void ofApp::draw() {
 	
 	ofSetColor(255, 255, 255);
+    kinect.draw(0,0);
+    glBlendFunc(GL_DST_COLOR, GL_ZERO);
     grayImage.draw(0, 0);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     contourFinder.draw(0,0);
     
     
-    if(contourFinder.nBlobs > 0){
-        synths.push_back(new MySynth(contourFinder.blobs[0].centroid.x,contourFinder.blobs[0].centroid.y));
-        synths.back()->play();
+    if(bSoundOn){
+        if(contourFinder.nBlobs > 0){
+            synths.push_back(new MySynth(contourFinder.blobs[0].centroid.x,contourFinder.blobs[0].centroid.y));
+            synths.back()->play();
+        }
+        for (int i = 0; i < synths.size(); i++)
+            synths[i]->release();
+        
+        vector<MySynth*>::iterator it = synths.begin();
+        while (it != synths.end())
+        {
+            MySynth *s = *it;
+            s->draw();
+            
+            if (!s->isAlive())
+            {
+                it = synths.erase(it);
+                delete s;
+            }
+            else
+                it++;
+        }
     }
-    for (int i = 0; i < synths.size(); i++)
-		synths[i]->release();
-    
-    vector<MySynth*>::iterator it = synths.begin();
-	while (it != synths.end())
-	{
-		MySynth *s = *it;
-		s->draw();
-		
-		if (!s->isAlive())
-		{
-			it = synths.erase(it);
-			delete s;
-		}
-		else
-			it++;
-	}
 
 }
 
@@ -167,6 +172,11 @@ void ofApp::exit() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed (int key) {
+    
+    if(key == '1'){
+        bSoundOn = !bSoundOn;
+    }
+    
 	switch (key) {
 		case '>':
 		case '.':
